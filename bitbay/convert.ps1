@@ -11,13 +11,16 @@ function Convert-Transaction($group) {
     $buy = $group | ? { $_.Rodzaj -eq "Otrzymanie środków z transakcji na rachunek" } | Select-Object -First 1
     $fee = $group | ? { $_.Rodzaj -eq "Pobranie prowizji za transakcję" } | Select-Object -First 1
 
+    $buyValue = Convert-Number $buy."Wartość"
+    $feeValue = Convert-Number $fee."Wartość"
+
     $obj = New-CsvObject
     $obj.Type = "Trade"
-    $obj.Buy = Convert-Number $buy."Wartość"
+    $obj.Buy = $buyValue - $feeValue
     $obj.CurB = $buy.Waluta
     $obj.Sell = Convert-Number $sell."Wartość"
     $obj.CurS = $sell.Waluta
-    $obj.Fee = Convert-Number $fee."Wartość"
+    $obj.Fee = $feeValue
     $obj.CurF = $fee.Waluta
     $obj.Date = $buy."Data operacji"
     $obj
